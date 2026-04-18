@@ -13,7 +13,7 @@ import {
   XAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
 // ─────────────────────────────────────────────────────────
@@ -504,7 +504,7 @@ function BondCard({ transactions, partners, you, onProfile }) {
               {inv > 0 && (
                 <div>
                   <p style={{ fontSize:12, fontWeight:800, color:'rgba(255,255,255,0.7)', lineHeight:1.3 }}>{inrS(inv)}</p>
-                  <p style={{ fontSize:10, color:'rgba(255,255,255,0.45)', fontWeight:600 }}>invested</p>
+                  <p style={{ fontSize:10, color:'rgba(255,255,255,0.45)', fontWeight:600 }}>Credit Amount</p>
                 </div>
               )}
             </div>
@@ -531,7 +531,7 @@ function BondCard({ transactions, partners, you, onProfile }) {
           </div>
         </div>
         <div style={{ textAlign:'right' }}>
-          <p style={{ fontSize:11, color:C.accent, fontWeight:600, marginBottom:2 }}>Total Spent</p>
+          <p style={{ fontSize:11, color:C.accent, fontWeight:600, marginBottom:2 }}>Debit Amount</p>
           <p style={{ fontSize:15, fontWeight:900, color:'#E96B3E' }}>{inrS(spent)}</p>
         </div>
       </div>
@@ -951,11 +951,11 @@ function Transactions({ txs, partners, editTx, deleteTx }) {
           {list.length>0 && (
             <div style={{ display:'flex', gap:24 }}>
               <div>
-                <p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Invested</p>
+                <p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Credit Amount</p>
                 <p style={{ fontSize:17, fontWeight:900, color:'rgba(255,255,255,0.9)' }}>{inrS(inv)}</p>
               </div>
               <div>
-                <p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Spent</p>
+                <p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Debit Amount</p>
                 <p style={{ fontSize:17, fontWeight:900, color:'#fff' }}>{inrS(exp)}</p>
               </div>
               <div>
@@ -1019,8 +1019,8 @@ function Partners({ partners, txs, addP, editP, delP }) {
           </div>
           <div style={{ display:'flex', gap:28, marginTop:16 }}>
             <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Partners</p><p style={{ fontSize:17, fontWeight:900, color:'rgba(255,255,255,0.8)' }}>{partners.length}</p></div>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Invested</p><p style={{ fontSize:17, fontWeight:900, color:'rgba(255,255,255,0.9)' }}>{inrS(totInv)}</p></div>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Spent</p><p style={{ fontSize:17, fontWeight:900, color:'#fff' }}>{inrS(totExp)}</p></div>
+            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Credit Amount</p><p style={{ fontSize:17, fontWeight:900, color:'rgba(255,255,255,0.9)' }}>{inrS(totInv)}</p></div>
+            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Debit Amount</p><p style={{ fontSize:17, fontWeight:900, color:'#fff' }}>{inrS(totExp)}</p></div>
           </div>
         </div>
       </div>
@@ -1065,7 +1065,7 @@ function Partners({ partners, txs, addP, editP, delP }) {
               </div>
 
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderBottom:`1px solid ${C.bdr}` }}>
-                {[{l:'Invested',v:pInv,c:C.success},{l:'Spent',v:pExp,c:'#E96B3E'}].map(({l,v,c})=>(
+                {[{l:'Credit Amount',v:pInv,c:C.success},{l:'Debit Amount',v:pExp,c:'#E96B3E'}].map(({l,v,c})=>(
                   <div key={l} style={{ padding:'16px 18px' }}>
                     <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:C.muted, marginBottom:8 }}>{l}</p>
                     <p style={{ fontSize:24, fontWeight:900, color:c, letterSpacing:'-0.5px' }}>{inr(v)}</p>
@@ -1153,8 +1153,8 @@ function Reports({ txs, partners }) {
     doc.setFontSize(10); doc.setTextColor(107,114,128);
     doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 14, 30);
     doc.setFontSize(12); doc.setTextColor(33,37,41);
-    doc.text(`Total Received: ${inr(inv)}`, 14, 42);
-    doc.text(`Total Expenses: ${inr(exp)}`, 14, 48);
+    doc.text(`Total Credit Amount: ${inr(inv)}`, 14, 42);
+    doc.text(`Total Debit Amount: ${inr(exp)}`, 14, 48);
     doc.text(`Final Balance: ${inr(bal)}`, 14, 54);
     let y = 64;
     partners.forEach(p => {
@@ -1162,7 +1162,7 @@ function Reports({ txs, partners }) {
       const pinv = ptx.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
       const pexp = ptx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
       doc.setFontSize(10);
-      doc.text(`${p.name}: Invested ${inr(pinv)}  |  Spent ${inr(pexp)}`, 14, y);
+      doc.text(`${p.name}: Credit Amount ${inr(pinv)}  |  Debit Amount ${inr(pexp)}`, 14, y);
       y += 6;
     });
     const sorted = [...txs].sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -1174,7 +1174,7 @@ function Reports({ txs, partners }) {
       runBal += (rec - ex);
       return [dShrt(t.date), `${t.cat}${t.note ? ' - ' + t.note : ''}`, partners.find(p=>p.id===t.pid)?.name||'Unknown', rec>0?inr(rec):'-', ex>0?inr(ex):'-', inr(runBal)];
     });
-    doc.autoTable({ startY: y+8, head:[['Date','Field / Description','Partner','Received','Expense','Balance']], body:tableData, theme:'striped', headStyles:{fillColor:[73,80,87]}, styles:{fontSize:9}, margin:{top:20} });
+    autoTable(doc, { startY: y+8, head:[['Date','Field / Description','Partner','Credit Amount','Debit Amount','Balance']], body:tableData, theme:'striped', headStyles:{fillColor:[73,80,87]}, styles:{fontSize:9}, margin:{top:20} });
     const pageCount = doc.internal.getNumberOfPages();
     for(let i=1;i<=pageCount;i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150); doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width/2, doc.internal.pageSize.height-10, {align:'center'}); }
     doc.save('LEM_Financial_Report.pdf');
@@ -1189,18 +1189,18 @@ function Reports({ txs, partners }) {
       const rec = isInv ? t.amount : 0;
       const ex = !isInv ? t.amount : 0;
       runBal += (rec - ex);
-      return { 'Date':dShrt(t.date), 'Field / Description':`${t.cat}${t.note?' - '+t.note:''}`, 'Partner Name':partners.find(p=>p.id===t.pid)?.name||'Unknown', 'Amount Received':rec>0?rec:0, 'Expense':ex>0?ex:0, 'Balance':runBal };
+      return { 'Date':dShrt(t.date), 'Field / Description':`${t.cat}${t.note?' - '+t.note:''}`, 'Partner Name':partners.find(p=>p.id===t.pid)?.name||'Unknown', 'Credit Amount':rec>0?rec:0, 'Debit Amount':ex>0?ex:0, 'Balance':runBal };
     });
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Transactions");
-    const summaryRows = [{ Metric:'Total Amount Received', Value:inv },{ Metric:'Total Expenses', Value:exp },{ Metric:'Final Balance', Value:bal },{}];
+    const summaryRows = [{ Metric:'Total Credit Amount', Value:inv },{ Metric:'Total Debit Amount', Value:exp },{ Metric:'Final Balance', Value:bal },{}];
     partners.forEach(p => {
       const ptx = txs.filter(t=>t.pid===p.id);
       const pinv = ptx.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
       const pexp = ptx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-      summaryRows.push({Metric:`${p.name} - Total Invested`,Value:pinv});
-      summaryRows.push({Metric:`${p.name} - Total Spent`,Value:pexp});
+      summaryRows.push({Metric:`${p.name} - Total Credit Amount`,Value:pinv});
+      summaryRows.push({Metric:`${p.name} - Total Debit Amount`,Value:pexp});
     });
     const wsSum = XLSX.utils.json_to_sheet(summaryRows);
     XLSX.utils.book_append_sheet(wb, wsSum, "Summary");
@@ -1230,8 +1230,8 @@ function Reports({ txs, partners }) {
           <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.4)', marginBottom:10 }}>Net Balance</p>
           <p style={{ fontSize:40, fontWeight:900, color:'#fff', letterSpacing:'-2px', lineHeight:1, marginBottom:16 }}>{inr(bal)}</p>
           <div style={{ display:'flex', gap:28 }}>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Invested</p><p style={{ fontSize:15, fontWeight:900, color:'#fff' }}>{inr(inv)}</p></div>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Spent</p><p style={{ fontSize:15, fontWeight:900, color:'#fff' }}>{inr(exp)}</p></div>
+            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Credit Amount</p><p style={{ fontSize:15, fontWeight:900, color:'#fff' }}>{inr(inv)}</p></div>
+            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Debit Amount</p><p style={{ fontSize:15, fontWeight:900, color:'#fff' }}>{inr(exp)}</p></div>
           </div>
         </div>
 
@@ -1250,8 +1250,8 @@ function Reports({ txs, partners }) {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false}/>
                 <XAxis dataKey="m" tick={{ fontSize:9, fill:C.muted }} axisLine={false} tickLine={false}/>
                 <Tooltip contentStyle={{ background:C.text, border:'none', borderRadius:10, color:'#fff', fontSize:11 }}/>
-                <Area type="monotone" dataKey="inv" stroke={C.success} fill="url(#gi)" strokeWidth={2} name="Invested" dot={false}/>
-                <Area type="monotone" dataKey="exp" stroke={C.primary} fill="url(#gs)" strokeWidth={2} name="Spent" dot={false}/>
+                <Area type="monotone" dataKey="inv" stroke={C.success} fill="url(#gi)" strokeWidth={2} name="Credit Amount" dot={false}/>
+                <Area type="monotone" dataKey="exp" stroke={C.primary} fill="url(#gs)" strokeWidth={2} name="Debit Amount" dot={false}/>
               </AreaChart>
             </ResponsiveContainer>
           </div>
