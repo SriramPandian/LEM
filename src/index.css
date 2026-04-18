@@ -6,7 +6,7 @@ html, body, #root {
   margin: 0;
   padding: 0;
   font-family: 'Inter', sans-serif;
-  background: #E6D3B3;
+  background: #000000; /* Dark background to match the new theme */
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
