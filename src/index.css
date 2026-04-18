@@ -1,0 +1,61 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: #E6D3B3;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+/* ── Scrollbar ── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Safe area ── */
+.pb-safe { padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.5rem); }
+
+/* ── Slide-up modal ── */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* ── Fade in ── */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.animate-fade-in { animation: fadeIn 0.22s ease both; }
+
+/* ── Pop ── */
+@keyframes pop {
+  from { transform: scale(0.86); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+.animate-pop { animation: pop 0.26s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ── Strip number arrows ── */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* ── Date picker ── */
+input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.35; cursor: pointer; }
+
+/* ── Recharts ── */
+.recharts-tooltip-wrapper { outline: none !important; }
+
+/* ── Global ── */
+body { letter-spacing: -0.015em; }
+
+/* ── Warm glass card ── */
+.warm-glass {
+  background: rgba(255, 252, 247, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(192, 138, 90, 0.15);
+}
