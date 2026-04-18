@@ -1,0 +1,11 @@
+{
+  "name": "lem-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd ../KIA && npm run dev",
+    "build": "cd ../KIA && npm run build",
+    "preview": "cd ../KIA && npm run preview",
+    "lint": "cd ../KIA && npm run lint"
+  }
+}
