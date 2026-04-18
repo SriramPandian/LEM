@@ -12,7 +12,7 @@ import {
   PieChart as PieChartComp, Pie, Cell,
   XAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
@@ -20,35 +20,37 @@ import * as XLSX from 'xlsx';
 //  DESIGN TOKENS  — User Specified Palette
 // ─────────────────────────────────────────────────────────
 const C = {
-  bg:      '#E9ECEF',
-  card:    '#F8F9FA',
-  primary: '#495057',
-  text:    '#212529',
-  accent:  '#6C757D',
+  bg:      '#F8F9FA',
+  card:    '#ffffff',
+  primary: '#2F3640',
+  text:    '#2F3640',
+  accent:  '#8E959E',
   white:   '#ffffff',
-  bdr:     'rgba(0,0,0,0.07)',
-  shd:     '0 2px 12px rgba(0,0,0,0.05)',
-  shdM:    '0 8px 28px rgba(0,0,0,0.1)',
+  bdr:     'rgba(0,0,0,0.06)',
+  shd:     '0 2px 12px rgba(0,0,0,0.03)',
+  shdM:    '0 8px 28px rgba(0,0,0,0.08)',
   muted:   '#ADB5BD',
   danger:  '#EF4444',
   success: '#10b981',
+  orange:  '#ff7a00',
+  cream:   '#FFFDF4',
 };
 
-const HERO_BG    = `linear-gradient(150deg, #343a40 0%, #495057 60%, #6C757D 100%)`;
-const BRAND_GRAD = `linear-gradient(135deg, #495057 0%, #212529 100%)`;
+const HERO_BG    = `linear-gradient(150deg, #ff7a00 0%, #ff9e00 100%)`;
+const BRAND_GRAD = `linear-gradient(135deg, #2F3640 0%, #111418 100%)`;
 
 // ─────────────────────────────────────────────────────────
 //  CATEGORIES & DATA
 // ─────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { name:'Office',    icon: Building2, color:'#6c757d' },
-  { name:'Salary',   icon: Banknote,  color:'#495057' },
-  { name:'Travel',   icon: Plane,     color:'#343a40' },
-  { name:'Marketing',icon: Megaphone, color:'#212529' },
-  { name:'Software', icon: Monitor,   color:'#6c757d' },
-  { name:'Utilities',icon: Zap,       color:'#495057' },
-  { name:'Food',     icon: Coffee,    color:'#343a40' },
-  { name:'Other',    icon: Package,   color:'#212529' },
+  { name:'Office',    icon: Building2, color:'#2F3640' },
+  { name:'Salary',   icon: Banknote,  color:'#ff7a00' },
+  { name:'Travel',   icon: Plane,     color:'#10b981' },
+  { name:'Marketing',icon: Megaphone, color:'#EF4444' },
+  { name:'Software', icon: Monitor,   color:'#3b82f6' },
+  { name:'Utilities',icon: Zap,       color:'#8b5cf6' },
+  { name:'Food',     icon: Coffee,    color:'#F59E0B' },
+  { name:'Other',    icon: Package,   color:'#8E959E' },
 ];
 
 const MONTHS = ['Apr 2026','Mar 2026','Feb 2026','Jan 2026','Dec 2025','Nov 2025'];
@@ -204,10 +206,10 @@ function Login({ onLogin }) {
         </svg>
 
         {/* LEM brand */}
-        <div style={{ position:'absolute', top:48, left:28, display:'flex', flexDirection:'column' }}>
-          <span style={{ fontSize:13, fontWeight:900, letterSpacing:'0.25em', color:'rgba(255,255,255,0.5)', textTransform:'uppercase' }}>LEM</span>
-          <span style={{ fontSize:28, fontWeight:900, color:'#fff', letterSpacing:'-0.5px', lineHeight:1.2, marginTop:8 }}>Welcome back,</span>
-          <span style={{ fontSize:15, color:'rgba(255,255,255,0.6)', marginTop:6, fontWeight:500 }}>Sign in to your workspace</span>
+        <div style={{ position:'absolute', top:48, left:28, display:'flex', flexDirection:'column', zIndex: 10 }}>
+          <span style={{ fontSize:13, fontWeight:900, letterSpacing:'0.25em', color:C.text, opacity: 0.8, textTransform:'uppercase' }}>LEM</span>
+          <span style={{ fontSize:28, fontWeight:900, color:C.text, letterSpacing:'-0.5px', lineHeight:1.2, marginTop:8 }}>Welcome back,</span>
+          <span style={{ fontSize:15, color:C.text, opacity: 0.9, marginTop:6, fontWeight:500 }}>Sign in to your workspace</span>
         </div>
 
         {/* bottom wave SVG */}
@@ -253,9 +255,9 @@ function Login({ onLogin }) {
           id="login-btn"
           onClick={handleLogin}
           style={{
-            width:'100%', padding:'17px', borderRadius:16, background:BRAND_GRAD, color:'#fff',
+            width:'100%', padding:'17px', borderRadius:16, background:HERO_BG, color:'#fff',
             fontWeight:800, fontSize:15, border:'none', cursor:'pointer',
-            boxShadow:'0 8px 24px rgba(73,80,87,0.35)', transition:'transform 0.1s',
+            boxShadow:'0 10px 24px rgba(255,122,0,0.3)', transition:'transform 0.1s',
           }}
           onMouseDown={e => e.currentTarget.style.transform='scale(0.98)'}
           onMouseUp={e => e.currentTarget.style.transform='scale(1)'}
@@ -265,7 +267,7 @@ function Login({ onLogin }) {
 
         <p style={{ textAlign:'center', fontSize:13, color:C.muted, marginTop:24 }}>
           Don't have an account?{' '}
-          <button onClick={onLogin} style={{ background:'none', border:'none', color:C.primary, fontWeight:700, cursor:'pointer', fontSize:13 }}>
+          <button onClick={onLogin} style={{ background:'none', border:'none', color:C.orange, fontWeight:700, cursor:'pointer', fontSize:13 }}>
             Sign up
           </button>
         </p>
@@ -394,10 +396,10 @@ function FloatingNav({ active, set, onAdd }) {
           return (
             <button key={it.id} onClick={onAdd} style={{
               width: 52, height: 52, borderRadius: 26,
-              background: BRAND_GRAD, border: `3px solid ${C.white}`,
+              background: C.orange, border: `3px solid ${C.white}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: C.white, cursor: 'pointer',
-              boxShadow: `0 10px 24px rgba(73,80,87,0.35)`,
+              boxShadow: `0 10px 24px rgba(255,122,0,0.35)`,
               transform: 'translateY(-18px)',
               flexShrink: 0, transition: 'transform 0.2s',
             }}
@@ -457,7 +459,7 @@ function BondCard({ transactions, partners, you, onProfile }) {
   const gr   = hr<12?'morning':hr<17?'afternoon':'evening';
 
   return (
-    <div style={{ borderRadius: '0 0 32px 32px', overflow:'hidden', background:C.text, boxShadow:C.shdM }}>
+    <div style={{ position: 'relative', zIndex: 10, borderRadius: '0 0 32px 32px', overflow:'hidden', background:C.text, boxShadow:'0 10px 30px rgba(0,0,0,0.08)' }}>
       <div style={{ position:'relative', overflow:'hidden' }}>
         <div style={{ position:'absolute', inset:0, background:HERO_BG }}/>
         
@@ -483,10 +485,11 @@ function BondCard({ transactions, partners, you, onProfile }) {
         </div>
 
         {/* Main Stats Area */}
-        <div style={{ position:'relative', padding:'24px 20px 32px', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
+        <div style={{ position:'relative', padding:'24px 20px 32px', display:'flex', flexDirection:'column', justifyContent:'space-between', zIndex:10 }}>
           <div style={{
             display:'inline-flex', alignItems:'center', marginBottom:16,
-            background:'rgba(255,255,255,0.12)', padding:'5px 12px', borderRadius:8, alignSelf:'flex-start',
+            background:'rgba(255,255,255,0.2)', padding:'5px 12px', borderRadius:8, alignSelf:'flex-start',
+            boxShadow:'0 2px 8px rgba(0,0,0,0.1)',
           }}>
             <span style={{ fontSize:10, fontWeight:800, letterSpacing:'0.08em', color:'#fff' }}>
               {burn}% BURN RATE
@@ -953,7 +956,7 @@ function Transactions({ txs, partners, editTx, deleteTx }) {
               </div>
               <div>
                 <p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Spent</p>
-                <p style={{ fontSize:17, fontWeight:900, color:'#FB7185' }}>{inrS(exp)}</p>
+                <p style={{ fontSize:17, fontWeight:900, color:'#fff' }}>{inrS(exp)}</p>
               </div>
               <div>
                 <p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Count</p>
@@ -1017,7 +1020,7 @@ function Partners({ partners, txs, addP, editP, delP }) {
           <div style={{ display:'flex', gap:28, marginTop:16 }}>
             <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Partners</p><p style={{ fontSize:17, fontWeight:900, color:'rgba(255,255,255,0.8)' }}>{partners.length}</p></div>
             <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Invested</p><p style={{ fontSize:17, fontWeight:900, color:'rgba(255,255,255,0.9)' }}>{inrS(totInv)}</p></div>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Spent</p><p style={{ fontSize:17, fontWeight:900, color:'#FB7185' }}>{inrS(totExp)}</p></div>
+            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Spent</p><p style={{ fontSize:17, fontWeight:900, color:'#fff' }}>{inrS(totExp)}</p></div>
           </div>
         </div>
       </div>
@@ -1046,7 +1049,7 @@ function Partners({ partners, txs, addP, editP, delP }) {
                   <div>
                     <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:3 }}>
                       <p style={{ fontSize:16, fontWeight:900, color:C.text }}>{p.name}</p>
-                      {p.isYou && <span style={{ fontSize:9, fontWeight:900, padding:'2px 8px', borderRadius:6, background:`${p.color}18`, color:p.color, letterSpacing:'0.1em' }}>YOU</span>}
+                      {p.isYou && <span style={{ fontSize:9, fontWeight:900, padding:'2px 8px', borderRadius:6, background:`${C.orange}25`, color:C.orange, letterSpacing:'0.1em' }}>ADMIN</span>}
                     </div>
                     {p.email && <p style={{ fontSize:11, color:C.accent }}>{p.email}</p>}
                   </div>
@@ -1225,10 +1228,10 @@ function Reports({ txs, partners }) {
       <div style={{ background:C.bg, marginTop:-28, borderRadius: '28px 28px 0 0', padding:'20px 16px 0' }}>
         <div style={{ background:HERO_BG, borderRadius:20, padding:'22px 20px', marginBottom:16, boxShadow:'0 12px 32px rgba(0,0,0,0.12)' }}>
           <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.4)', marginBottom:10 }}>Net Balance</p>
-          <p style={{ fontSize:40, fontWeight:900, color:bal>=0?'#fff':C.danger, letterSpacing:'-2px', lineHeight:1, marginBottom:16 }}>{inr(bal)}</p>
+          <p style={{ fontSize:40, fontWeight:900, color:'#fff', letterSpacing:'-2px', lineHeight:1, marginBottom:16 }}>{inr(bal)}</p>
           <div style={{ display:'flex', gap:28 }}>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Invested</p><p style={{ fontSize:15, fontWeight:900, color:C.success }}>{inr(inv)}</p></div>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Spent</p><p style={{ fontSize:15, fontWeight:900, color:'#FB7185' }}>{inr(exp)}</p></div>
+            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Invested</p><p style={{ fontSize:15, fontWeight:900, color:'#fff' }}>{inr(inv)}</p></div>
+            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Spent</p><p style={{ fontSize:15, fontWeight:900, color:'#fff' }}>{inr(exp)}</p></div>
           </div>
         </div>
 
@@ -1282,16 +1285,16 @@ function Reports({ txs, partners }) {
           </div>
         )}
 
-        <div style={{ background:C.card, borderRadius:20, padding:'20px', marginBottom:16, border:`1px solid ${C.bdr}`, boxShadow:C.shd }}>
-          <p style={{ fontSize:11, fontWeight:900, letterSpacing:'0.14em', textTransform:'uppercase', color:C.accent, marginBottom:14 }}>Summary</p>
+        <div style={{ background:C.cream, borderRadius:20, padding:'20px', marginBottom:16, border:`1px solid ${C.bdr}`, boxShadow:C.shd }}>
+          <p style={{ fontSize:11, fontWeight:900, letterSpacing:'0.14em', textTransform:'uppercase', color:C.accent, marginBottom:14 }}>Smart Summary</p>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
             {[
               {e:<BarChart3 size={22} color={C.primary}/>,l:'Transactions',v:String(txs.length),c:C.primary},
               {e:<Users2 size={22} color="#3b82f6"/>,l:'Partners',v:String(partners.length),c:'#3b82f6'},
               {e:<TrendingUp size={22} color={C.accent}/>,l:'Avg Entry',c:C.accent,v:txs.length?inrS(txs.reduce((s,t)=>s+t.amount,0)/txs.length):'₹0'},
-              {e:<Zap size={22} color="#E96B3E"/>,l:'Burn Rate',c:'#E96B3E',v:inv>0?`${Math.round((exp/inv)*100)}%`:'0%'},
+              {e:<Zap size={22} color={C.orange}/>,l:'Burn Rate',c:C.orange,v:inv>0?`${Math.round((exp/inv)*100)}%`:'0%'},
             ].map(s=>(
-              <div key={s.l} style={{ background:C.bg, borderRadius:14, padding:'16px', border:`1px solid ${C.bdr}` }}>
+              <div key={s.l} style={{ background:C.card, borderRadius:14, padding:'16px', border:`1px solid ${C.bdr}` }}>
                 <span style={{ display:'block', marginBottom:8 }}>{s.e}</span>
                 <p style={{ fontSize:20, fontWeight:900, color:s.c, letterSpacing:'-0.5px' }}>{s.v}</p>
                 <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', color:C.muted, marginTop:4 }}>{s.l}</p>

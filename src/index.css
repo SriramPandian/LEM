@@ -8,10 +8,11 @@ html, body, #root {
   margin: 0;
   padding: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  background: #E9ECEF;
+  background: #F8F9FA;
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
   overscroll-behavior: none;
 }
 
@@ -54,7 +55,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.35; cursor: p
 /* ── Global ── */
 body {
   letter-spacing: -0.015em;
-  color: #212529;
+  color: #2F3640;
 }
 
 button { font-family: inherit; }
