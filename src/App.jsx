@@ -5,7 +5,8 @@ import {
   ChevronDown, Trash2, Check, TrendingUp, MoreVertical,
   AlertCircle, CheckCircle2, UserPlus,
   Building2, Banknote, Plane, Megaphone, Monitor, Zap, Coffee, Package,
-  FileSpreadsheet, FileText, LogOut, User, Shield, Bell
+  FileSpreadsheet, FileText, LogOut, User, Shield, Bell,
+  MapPin, ClipboardList, CreditCard, Briefcase, SlidersHorizontal
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar,
@@ -43,15 +44,17 @@ const BRAND_GRAD = `linear-gradient(135deg, #2F3640 0%, #111418 100%)`;
 //  CATEGORIES & DATA
 // ─────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { name:'Office',    icon: Building2, color:'#2F3640' },
-  { name:'Salary',   icon: Banknote,  color:'#ff7a00' },
-  { name:'Travel',   icon: Plane,     color:'#10b981' },
-  { name:'Marketing',icon: Megaphone, color:'#EF4444' },
-  { name:'Software', icon: Monitor,   color:'#3b82f6' },
-  { name:'Utilities',icon: Zap,       color:'#8b5cf6' },
-  { name:'Food',     icon: Coffee,    color:'#F59E0B' },
-  { name:'Other',    icon: Package,   color:'#8E959E' },
+  { name:'Office',    icon:'Building2',  color:'#2F3640' },
+  { name:'Salary',   icon:'Banknote',   color:'#ff7a00' },
+  { name:'Travel',   icon:'Plane',      color:'#10b981' },
+  { name:'Marketing',icon:'Megaphone',  color:'#EF4444' },
+  { name:'Software', icon:'Monitor',    color:'#3b82f6' },
+  { name:'Utilities',icon:'Zap',        color:'#8b5cf6' },
+  { name:'Food',     icon:'Coffee',     color:'#F59E0B' },
+  { name:'Other',    icon:'Package',    color:'#8E959E' },
 ];
+
+const ICON_MAP = { Building2, Banknote, Plane, Megaphone, Monitor, Zap, Coffee, Package, MapPin, ClipboardList, CreditCard, Briefcase, Users2 };
 
 const MONTHS = ['Apr 2026','Mar 2026','Feb 2026','Jan 2026','Dec 2025','Nov 2025'];
 const P_COLORS = ['#212529','#343a40','#495057','#6c757d','#adb5bd','#dee2e6'];
@@ -61,19 +64,24 @@ const PARTNERS_INIT = [
   { id:'p2', name:'Tharsan', email:'tharsan@lem.in', phone:'+91 98765 00002', isYou:false, initials:'TH', color:'#495057' },
 ];
 
+const WORKERS_INIT = [
+  { id:'w1', name:'Worker 1' },
+  { id:'w2', name:'Worker 2' },
+];
+
+const PAY_MODES = ['Cash', 'UPI', 'Bank Transfer', 'Card', 'Cheque'];
+
 const TX_INIT = [
   { id:'t1',  type:'expense',    amount:  18000, pid:'p1', cat:'Travel',    date:'2026-04-10', note:'Client site — Chennai'   },
   { id:'t2',  type:'expense',    amount:  25000, pid:'p2', cat:'Marketing', date:'2026-04-08', note:'Digital ad Q2'            },
   { id:'t3',  type:'expense',    amount:   6500, pid:'p1', cat:'Office',    date:'2026-04-05', note:'Stationery & supplies'    },
-  { id:'t4',  type:'investment', amount: 100000, pid:'p1', cat:'Salary',    date:'2026-04-01', note:'April capital injection'  },
   { id:'t5',  type:'expense',    amount:  45000, pid:'p1', cat:'Office',    date:'2026-03-28', note:'Monthly office rent'      },
   { id:'t6',  type:'expense',    amount: 120000, pid:'p1', cat:'Salary',    date:'2026-03-25', note:'March team salaries'      },
   { id:'t7',  type:'expense',    amount:  38000, pid:'p2', cat:'Marketing', date:'2026-03-20', note:'Brand shoot & design'     },
   { id:'t8',  type:'expense',    amount:   9800, pid:'p2', cat:'Software',  date:'2026-03-15', note:'Annual subscriptions'     },
-  { id:'t9',  type:'investment', amount:  75000, pid:'p2', cat:'Salary',    date:'2026-03-01', note:'March contribution'       },
 ];
 
-const LS = 'lem_v7';
+const LS = 'lem_v8';
 const load = () => { try { const d = localStorage.getItem(LS); return d ? JSON.parse(d) : null; } catch { return null; } };
 const save = (d) => { try { localStorage.setItem(LS, JSON.stringify(d)); } catch {} };
 
@@ -83,7 +91,13 @@ const save = (d) => { try { localStorage.setItem(LS, JSON.stringify(d)); } catch
 const inr   = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
 const inrS  = (n) => { if (n>=10000000) return `₹${(n/10000000).toFixed(1)}Cr`; if (n>=100000) return `₹${(n/100000).toFixed(1)}L`; if (n>=1000) return `₹${(n/1000).toFixed(1)}k`; return inr(n); };
 const dShrt = (iso) => new Date(iso).toLocaleDateString('en-IN',{ day:'numeric', month:'short', year:'numeric' });
-const catFn = (n)  => CATEGORIES.find(c => c.name===n) || CATEGORIES[7];
+const catFn = (n, cats) => {
+  const list = (cats || CATEGORIES);
+  const c = list.find(x => x.name===n) || list[0] || CATEGORIES[0];
+  const iconKey = typeof c.icon === 'string' ? c.icon : null;
+  const IconComponent = iconKey ? (ICON_MAP[iconKey] || Package) : (typeof c.icon === 'function' ? c.icon : Package);
+  return { ...c, icon: IconComponent };
+};
 const initials = (n) => n.trim().split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2);
 
 // ─────────────────────────────────────────────────────────
@@ -377,7 +391,7 @@ function FloatingNav({ active, set, onAdd }) {
     { id:'dashboard',    icon:<LayoutDashboard/>, label:'Home'    },
     { id:'transactions', icon:<ArrowLeftRight/>,  label:'Activity'},
     { id:'add',          icon:<Plus/>,            label:'Add', isFab: true },
-    { id:'partners',     icon:<Users2/>,          label:'Team'    },
+    { id:'partners',     icon:<Users2/>,          label:'Management' },
     { id:'reports',      icon:<BarChart3/>,       label:'Reports' },
   ];
   return (
@@ -451,10 +465,7 @@ function SecHdr({ label, action, onAction }) {
 //  BOND-STYLE BALANCE CARD (Merged with Header)
 // ─────────────────────────────────────────────────────────
 function BondCard({ transactions, partners, you, onProfile }) {
-  const inv   = transactions.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
-  const spent = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const bal   = inv - spent;
-  const burn  = inv > 0 ? Math.round((spent/inv)*100) : 0;
+  const spent = transactions.reduce((s,t)=>s+t.amount,0);
   const hr   = new Date().getHours();
   const gr   = hr<12?'morning':hr<17?'afternoon':'evening';
 
@@ -486,30 +497,15 @@ function BondCard({ transactions, partners, you, onProfile }) {
 
         {/* Main Stats Area */}
         <div style={{ position:'relative', padding:'24px 20px 32px', display:'flex', flexDirection:'column', justifyContent:'space-between', zIndex:10 }}>
-          <div style={{
-            display:'inline-flex', alignItems:'center', marginBottom:16,
-            background:'rgba(255,255,255,0.2)', padding:'5px 12px', borderRadius:8, alignSelf:'flex-start',
-            boxShadow:'0 2px 8px rgba(0,0,0,0.1)',
-          }}>
-            <span style={{ fontSize:10, fontWeight:800, letterSpacing:'0.08em', color:'#fff' }}>
-              {burn}% BURN RATE
-            </span>
-          </div>
           <div>
-            <p style={{ fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.6)', marginBottom:2 }}>Company Balance</p>
+            <p style={{ fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.6)', marginBottom:2 }}>Total Spent</p>
             <div style={{ display:'flex', alignItems:'baseline', gap:8 }}>
               <p style={{ fontSize:48, fontWeight:900, color:'#fff', letterSpacing:'-2px', lineHeight:1 }}>
-                {inrS(bal)}
+                {inrS(spent)}
               </p>
-              {inv > 0 && (
-                <div>
-                  <p style={{ fontSize:12, fontWeight:800, color:'rgba(255,255,255,0.7)', lineHeight:1.3 }}>{inrS(inv)}</p>
-                  <p style={{ fontSize:10, color:'rgba(255,255,255,0.45)', fontWeight:600 }}>Credit Amount</p>
-                </div>
-              )}
             </div>
             <p style={{ fontSize:11, color:'rgba(255,255,255,0.5)', marginTop:6, fontWeight:500 }}>
-              Net Balance · {new Date().toLocaleDateString('en-IN',{month:'long',year:'numeric'})}
+              {new Date().toLocaleDateString('en-IN',{month:'long',year:'numeric'})}
             </p>
           </div>
         </div>
@@ -562,11 +558,11 @@ function ForYouTile({ icon: Icon, label, onClick }) {
 // ─────────────────────────────────────────────────────────
 //  TRANSACTION ROW
 // ─────────────────────────────────────────────────────────
-function TxRow({ tx, partner, isLast, showMenu, onEdit, onDelete }) {
+function TxRow({ tx, partner, worker, cats, isLast, showMenu, onEdit, onDelete }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const isExp = tx.type === 'expense';
-  const meta  = catFn(tx.cat);
+  const meta  = catFn(tx.cat, cats);
   const Icon = meta.icon;
 
   useEffect(() => {
@@ -595,14 +591,16 @@ function TxRow({ tx, partner, isLast, showMenu, onEdit, onDelete }) {
           <p style={{ fontSize:16, fontWeight:900, color:C.text, letterSpacing:'-0.4px', lineHeight:1 }}>
             {inr(tx.amount)}
           </p>
-          <p style={{ fontSize:11, color:C.accent, marginTop:4, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}>
+          <p style={{ fontSize:11, color:C.accent, marginTop:4, fontWeight:500, display:'flex', alignItems:'center', gap:5, flexWrap:'wrap' }}>
             <Icon size={12}/> {tx.cat}{tx.note ? `  ·  ${tx.note.slice(0,24)}` : ''}
+            {tx.workerId && worker && <span style={{ opacity:0.7 }}> · {worker.name}</span>}
+            {tx.loc && <span style={{ opacity:0.7 }}> · {tx.loc}</span>}
           </p>
         </div>
 
         <div style={{ flexShrink:0, textAlign:'right', marginLeft:8 }}>
           <p style={{ fontSize:10, fontWeight:800, color: isExp ? '#E96B3E' : C.success }}>
-            {isExp ? 'Expense' : 'Invest.'}
+            Expense
           </p>
           {partner && (
             <p style={{ fontSize:9, fontWeight:700, color:partner.color, marginTop:3 }}>{partner.name}</p>
@@ -653,7 +651,7 @@ function TxRow({ tx, partner, isLast, showMenu, onEdit, onDelete }) {
 // ─────────────────────────────────────────────────────────
 //  TIMELINE CONTAINER
 // ─────────────────────────────────────────────────────────
-function Timeline({ txs, partners, showMenu=false, onEdit, onDelete }) {
+function Timeline({ txs, partners, workers, cats, showMenu=false, onEdit, onDelete }) {
   if (!txs.length) return (
     <div style={{
       background:C.card, borderRadius:20, padding:'40px 20px',
@@ -688,6 +686,8 @@ function Timeline({ txs, partners, showMenu=false, onEdit, onDelete }) {
             key={tx.id}
             tx={tx}
             partner={partners.find(p=>p.id===tx.pid)}
+            worker={workers?.find(w=>w.id===tx.workerId)}
+            cats={cats}
             isLast={i===txs.length-1}
             showMenu={showMenu}
             onEdit={onEdit}
@@ -701,18 +701,30 @@ function Timeline({ txs, partners, showMenu=false, onEdit, onDelete }) {
 // ─────────────────────────────────────────────────────────
 //  ADD ENTRY MODAL
 // ─────────────────────────────────────────────────────────
-function AddEntry({ open, close, save, partners, edit }) {
+function AddEntry({ open, close, save, partners, workers, categories, edit }) {
   const [type, setType] = useState('expense');
   const [amt,  setAmt]  = useState('');
   const [pid,  setPid]  = useState(partners[0]?.id||'');
-  const [catN, setCatN] = useState(CATEGORIES[0].name);
+  const [wid,  setWid]  = useState('');
+  const [catN, setCatN] = useState(categories[0]?.name||'');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [note, setNote] = useState('');
+  const [loc,  setLoc]  = useState('');
+  const [sur,  setSur]  = useState('');
+  const [mode, setMode] = useState(PAY_MODES[0]);
 
   useEffect(() => {
-    if (edit) { setType(edit.type); setAmt(String(edit.amount)); setPid(edit.pid); setCatN(edit.cat); setDate(edit.date); setNote(edit.note||''); }
-    else       { setType('expense'); setAmt(''); setPid(partners[0]?.id||''); setCatN(CATEGORIES[0].name); setDate(new Date().toISOString().split('T')[0]); setNote(''); }
-  }, [edit, open]);
+    if (edit) { 
+      setType(edit.type); setAmt(String(edit.amount)); setPid(edit.pid); 
+      setWid(edit.workerId||''); setCatN(edit.cat); setDate(edit.date); 
+      setNote(edit.note||''); setLoc(edit.loc||''); setSur(edit.sur||''); setMode(edit.mode||PAY_MODES[0]); 
+    }
+    else { 
+      setType('expense'); setAmt(''); setPid(partners[0]?.id||''); 
+      setWid(''); setCatN(categories[0]?.name||''); setDate(new Date().toISOString().split('T')[0]); 
+      setNote(''); setLoc(''); setSur(''); setMode(PAY_MODES[0]); 
+    }
+  }, [edit, open, partners, categories]);
 
   if (!open) return null;
   const ok    = amt && !isNaN(+amt) && +amt>0;
@@ -723,8 +735,8 @@ function AddEntry({ open, close, save, partners, edit }) {
     <Sheet close={close}>
       <SheetHeader title={edit ? 'Edit Entry' : 'New Entry'} close={close}/>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, background:C.bg, padding:6, borderRadius:18, marginBottom:24, border:`1px solid ${C.bdr}` }}>
-        {[{v:'expense',l:'Expense',I:ArrowUpCircle},{v:'investment',l:'Investment',I:ArrowDownCircle}].map(({v,l,I})=>(
+      <div style={{ display:'grid', gridTemplateColumns:'1fr', gap:10, background:C.bg, padding:6, borderRadius:18, marginBottom:24, border:`1px solid ${C.bdr}` }}>
+        {[{v:'expense',l:'Expense',I:ArrowUpCircle}].map(({v,l,I})=>(
           <button key={v} onClick={()=>setType(v)} style={{
             height:44, borderRadius:12, border:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:8,
             fontWeight:700, fontSize:13, cursor:'pointer',
@@ -745,7 +757,7 @@ function AddEntry({ open, close, save, partners, edit }) {
       </Fld>
 
       {partners.length>0 && (
-        <Fld label="Partner">
+        <Fld label="Partner (Paid By)">
           <div className="scrollbar-hide" style={{ display:'flex', gap:10, overflowX:'auto', paddingBottom:4 }}>
             {partners.map(p=>(
               <button key={p.id} onClick={()=>setPid(p.id)} style={{
@@ -756,9 +768,6 @@ function AddEntry({ open, close, save, partners, edit }) {
                 boxShadow: pid===p.id ? `0 6px 20px ${p.color}55` : C.shd,
                 transition:'all 0.15s',
               }}>
-                <span style={{ width:22, height:22, borderRadius:'50%', fontSize:9, fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center', background:pid===p.id?'rgba(255,255,255,0.25)':p.color, color:'#fff' }}>
-                  {p.initials?.[0]}
-                </span>
                 {p.name}
               </button>
             ))}
@@ -766,11 +775,20 @@ function AddEntry({ open, close, save, partners, edit }) {
         </Fld>
       )}
 
+      {workers.length>0 && (
+        <Fld label="Worker / Employee (From Whom)">
+          <select value={wid} onChange={e=>setWid(e.target.value)} style={inp}>
+            <option value="">Select Worker...</option>
+            {workers.map(w=><option key={w.id} value={w.id}>{w.name}</option>)}
+          </select>
+        </Fld>
+      )}
+
       <Fld label="Category">
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8 }}>
-          {CATEGORIES.map(c=>{
+          {categories.map(c=>{
             const sel = catN===c.name;
-            const Icon = c.icon;
+            const Icon = typeof c.icon === 'string' ? ICON_MAP[c.icon] : c.icon || Package;
             return (
               <button key={c.name} onClick={()=>setCatN(c.name)} style={{
                 display:'flex', flexDirection:'column', alignItems:'center', gap:6,
@@ -788,6 +806,29 @@ function AddEntry({ open, close, save, partners, edit }) {
         </div>
       </Fld>
 
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+        <Fld label="Location">
+          <div style={{ position:'relative' }}>
+            <MapPin size={14} color={C.muted} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)' }}/>
+            <input type="text" value={loc} onChange={e=>setLoc(e.target.value)} placeholder="Site name" style={{ ...inp, paddingLeft:36 }}/>
+          </div>
+        </Fld>
+        <Fld label="Survey">
+          <div style={{ position:'relative' }}>
+            <ClipboardList size={14} color={C.muted} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)' }}/>
+            <input type="text" value={sur} onChange={e=>setSur(e.target.value)} placeholder="Survey ID" style={{ ...inp, paddingLeft:36 }}/>
+          </div>
+        </Fld>
+      </div>
+
+      <Fld label="Mode of Payment">
+        <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+          {PAY_MODES.map(m=>(
+            <Chip key={m} on={mode===m} onClick={()=>setMode(m)}>{m}</Chip>
+          ))}
+        </div>
+      </Fld>
+
       <Fld label="Date">
         <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={inp}/>
       </Fld>
@@ -795,14 +836,14 @@ function AddEntry({ open, close, save, partners, edit }) {
         <input type="text" value={note} onChange={e=>setNote(e.target.value)} placeholder="Short description…" style={{ ...inp, fontWeight:500 }}/>
       </Fld>
 
-      <button onClick={()=>{ if(!ok) return; save({type,amount:+amt,pid,cat:catN,date,note}); close(); }} disabled={!ok} style={{
+      <button onClick={()=>{ if(!ok) return; save({type,amount:+amt,pid,workerId:wid,cat:catN,date,note,loc,sur,mode}); close(); }} disabled={!ok} style={{
         width:'100%', height:52, borderRadius:14, border:'none', cursor:ok?'pointer':'not-allowed',
         background: ok ? (isExp ? 'linear-gradient(135deg,#E03E3E,#B91C1C)' : 'linear-gradient(135deg,#10b981,#059669)') : C.bg,
         color: ok ? '#fff' : C.muted, fontWeight:800, fontSize:15,
         boxShadow: ok ? (isExp?'0 10px 24px rgba(224,62,62,0.3)':'0 10px 24px rgba(16,185,129,0.3)') : 'none',
         transition:'all 0.2s',
       }}>
-        {edit ? 'Update' : `Save ${isExp?'Expense':'Investment'}`}
+        {edit ? 'Update' : 'Save Expense'}
       </button>
     </Sheet>
   );
@@ -882,7 +923,7 @@ function Chip({ on, onClick, children, color }) {
 // ─────────────────────────────────────────────────────────
 //  DASHBOARD VIEW
 // ─────────────────────────────────────────────────────────
-function Dashboard({ txs, partners, editTx, deleteTx, goTab, onProfile }) {
+function Dashboard({ txs, partners, workers, cats, editTx, deleteTx, goTab, onProfile }) {
   const [fp, setFp] = useState('all');
   const you  = partners.find(p=>p.isYou);
   const fTxs = fp==='all' ? txs : txs.filter(t=>t.pid===fp);
@@ -902,18 +943,9 @@ function Dashboard({ txs, partners, editTx, deleteTx, goTab, onProfile }) {
         </div>
 
         <div style={{ padding:'24px 16px 0' }}>
-          <SecHdr label="For You" action="VIEW ALL" onAction={()=>goTab('transactions')}/>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginTop:12 }}>
-            {CATEGORIES.map(c=>(
-              <ForYouTile key={c.name} icon={c.icon} label={c.name} onClick={()=>goTab('transactions')}/>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ padding:'24px 16px 0' }}>
           <SecHdr label="Recent Activity" action={txs.length>4?"VIEW ALL":null} onAction={()=>goTab('transactions')}/>
           <div style={{ marginTop:12 }}>
-            <Timeline txs={fTxs.slice(0,5)} partners={partners} showMenu={false}/>
+            <Timeline txs={fTxs.slice(0,5)} partners={partners} workers={workers} cats={cats} showMenu={false}/>
           </div>
         </div>
 
@@ -926,21 +958,23 @@ function Dashboard({ txs, partners, editTx, deleteTx, goTab, onProfile }) {
 // ─────────────────────────────────────────────────────────
 //  TRANSACTIONS VIEW
 // ─────────────────────────────────────────────────────────
-function Transactions({ txs, partners, editTx, deleteTx }) {
+function Transactions({ txs, partners, workers, cats, editTx, deleteTx }) {
   const [q,   setQ]   = useState('');
   const [typ, setTyp] = useState('all');
   const [pp,  setPp]  = useState('all');
+  const [ww,  setWw]  = useState('all');
+  const [showF, setShowF] = useState(false);
 
   const list = useMemo(()=>txs.filter(t=>{
     const str = q.toLowerCase();
     return (
-      (!str || t.cat.toLowerCase().includes(str)||(t.note||'').toLowerCase().includes(str)||(partners.find(p=>p.id===t.pid)?.name||'').toLowerCase().includes(str)) &&
-      (typ==='all'||t.type===typ) && (pp==='all'||t.pid===pp)
+      (!str || t.cat.toLowerCase().includes(str)||(t.note||'').toLowerCase().includes(str)||(t.loc||'').toLowerCase().includes(str)||(t.sur||'').toLowerCase().includes(str)) &&
+      (typ==='all'||t.type===typ) && (pp==='all'||t.pid===pp) && (ww==='all'||t.workerId===ww)
     );
-  }),[txs,q,typ,pp,partners]);
+  }),[txs,q,typ,pp,ww]);
 
-  const inv = list.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
   const exp = list.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const activeFilters = (typ!=='all'?1:0)+(pp!=='all'?1:0)+(ww!=='all'?1:0);
 
   return (
     <div>
@@ -950,10 +984,6 @@ function Transactions({ txs, partners, editTx, deleteTx }) {
           <h1 style={{ fontSize:32, fontWeight:900, color:'#fff', letterSpacing:'-1px', lineHeight:1, marginBottom:16 }}>Transactions</h1>
           {list.length>0 && (
             <div style={{ display:'flex', gap:24 }}>
-              <div>
-                <p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Credit Amount</p>
-                <p style={{ fontSize:17, fontWeight:900, color:'rgba(255,255,255,0.9)' }}>{inrS(inv)}</p>
-              </div>
               <div>
                 <p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Debit Amount</p>
                 <p style={{ fontSize:17, fontWeight:900, color:'#fff' }}>{inrS(exp)}</p>
@@ -969,25 +999,45 @@ function Transactions({ txs, partners, editTx, deleteTx }) {
 
       <div style={{ background:C.bg, marginTop:-28, borderRadius: '28px 28px 0 0' }}>
         <div style={{ padding:'20px 16px 0' }}>
-          <div style={{ position:'relative', marginBottom:16 }}>
-            <Search size={15} color={C.muted} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}/>
-            <input type="text" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search…"
-              style={{ ...inp, paddingLeft:40, background:C.card }}/>
-            {q && <button onClick={()=>setQ('')} style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', width:24, height:24, borderRadius:'50%', border:'none', background:C.bdr, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}><X size={12} color={C.accent}/></button>}
+          {/* Search + Filter toggle row */}
+          <div style={{ display:'flex', gap:10, marginBottom:16, alignItems:'center' }}>
+            <div style={{ position:'relative', flex:1 }}>
+              <Search size={15} color={C.muted} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}/>
+              <input type="text" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search…"
+                style={{ ...inp, paddingLeft:40, background:C.card }}/>
+              {q && <button onClick={()=>setQ('')} style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', width:24, height:24, borderRadius:'50%', border:'none', background:C.bdr, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}><X size={12} color={C.accent}/></button>}
+            </div>
+            <button onClick={()=>setShowF(f=>!f)} style={{
+              position:'relative', width:46, height:46, borderRadius:14, border:`1px solid ${showF?C.primary:C.bdr}`,
+              background: showF ? C.primary : C.card, cursor:'pointer',
+              display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.2s',
+            }}>
+              <SlidersHorizontal size={17} color={showF?'#fff':C.accent}/>
+              {activeFilters>0 && <span style={{ position:'absolute', top:6, right:6, width:8, height:8, borderRadius:'50%', background:C.orange, border:`2px solid ${C.card}` }}/>}
+            </button>
           </div>
 
-          <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto', marginBottom:12 }}>
-            {[{v:'all',l:'All'},{v:'expense',l:'Expenses'},{v:'investment',l:'Investments'}].map(({v,l})=>(
-              <Chip key={v} on={typ===v} onClick={()=>setTyp(v)}>{l}</Chip>
-            ))}
-          </div>
+          {/* Collapsible filter panel */}
+          {showF && (
+            <div style={{ background:C.card, borderRadius:16, padding:'14px 14px 6px', marginBottom:16, border:`1px solid ${C.bdr}` }}>
+              <p style={{ fontSize:9, fontWeight:900, letterSpacing:'0.12em', textTransform:'uppercase', color:C.muted, marginBottom:10 }}>Filter By</p>
+              <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto', marginBottom:10 }}>
+                {[{v:'all',l:'All'},{v:'expense',l:'Expenses'}].map(({v,l})=>(
+                  <Chip key={v} on={typ===v} onClick={()=>setTyp(v)}>{l}</Chip>
+                ))}
+              </div>
+              <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto', marginBottom:10 }}>
+                <Chip on={pp==='all'} onClick={()=>setPp('all')}>All Partners</Chip>
+                {partners.map(p=><Chip key={p.id} on={pp===p.id} onClick={()=>setPp(p.id)} color={p.color}>{p.name}</Chip>)}
+              </div>
+              <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto', marginBottom:10 }}>
+                <Chip on={ww==='all'} onClick={()=>setWw('all')}>All Workers</Chip>
+                {workers.map(w=><Chip key={w.id} on={ww===w.id} onClick={()=>setWw(w.id)}>{w.name}</Chip>)}
+              </div>
+            </div>
+          )}
 
-          <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto', marginBottom:20 }}>
-            <Chip on={pp==='all'} onClick={()=>setPp('all')}>All Partners</Chip>
-            {partners.map(p=><Chip key={p.id} on={pp===p.id} onClick={()=>setPp(p.id)} color={p.color}>{p.name}</Chip>)}
-          </div>
-
-          <Timeline txs={list} partners={partners} showMenu onEdit={editTx} onDelete={deleteTx}/>
+          <Timeline txs={list} partners={partners} workers={workers} cats={cats} showMenu onEdit={editTx} onDelete={deleteTx}/>
           <div style={{ height:48 }}/>
         </div>
       </div>
@@ -995,215 +1045,255 @@ function Transactions({ txs, partners, editTx, deleteTx }) {
   );
 }
 
+
 // ─────────────────────────────────────────────────────────
 //  PARTNERS VIEW
 // ─────────────────────────────────────────────────────────
-function Partners({ partners, txs, addP, editP, delP }) {
-  const [exp, setExp] = useState(null);
-  const totInv = txs.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
-  const totExp = txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-
+function Management({ partners, workers, cats, txs, addP, editP, delP, addW, editW, delW, addC, editC, delC }) {
+  const [sub, setSub] = useState('partners');
   return (
     <div>
       <div style={{ background:HERO_BG, paddingBottom:52 }}>
         <div style={{ padding:'20px 20px 0' }}>
-          <p style={{ fontSize:10, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.4)', marginBottom:8 }}>Team</p>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
-            <h1 style={{ fontSize:32, fontWeight:900, color:'#fff', letterSpacing:'-1px', lineHeight:1 }}>Partners</h1>
-            <button onClick={addP} style={{
-              display:'flex', alignItems:'center', gap:8, padding:'10px 18px', borderRadius:14,
-              background:'rgba(255,255,255,0.15)', color:'#fff', fontWeight:800, fontSize:12, border:'none', cursor:'pointer',
-            }}>
-              <UserPlus size={14}/> Add
-            </button>
-          </div>
-          <div style={{ display:'flex', gap:28, marginTop:16 }}>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Partners</p><p style={{ fontSize:17, fontWeight:900, color:'rgba(255,255,255,0.8)' }}>{partners.length}</p></div>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Credit Amount</p><p style={{ fontSize:17, fontWeight:900, color:'rgba(255,255,255,0.9)' }}>{inrS(totInv)}</p></div>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Debit Amount</p><p style={{ fontSize:17, fontWeight:900, color:'#fff' }}>{inrS(totExp)}</p></div>
+          <p style={{ fontSize:10, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.4)', marginBottom:8 }}>Workspace</p>
+          <h1 style={{ fontSize:32, fontWeight:900, color:'#fff', letterSpacing:'-1px', lineHeight:1, marginBottom:16 }}>Management</h1>
+          <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto' }}>
+            {[{id:'partners',l:'Partners',I:Users2},{id:'workers',l:'Workers',I:Briefcase},{id:'cats',l:'Categories',I:Package}].map(t=>(
+              <button key={t.id} onClick={()=>setSub(t.id)} style={{
+                padding:'10px 20px', borderRadius:14, fontSize:12, fontWeight:700, border:'none',
+                background: sub===t.id ? C.card : 'rgba(255,255,255,0.12)',
+                color: sub===t.id ? C.text : '#fff',
+                cursor:'pointer', display:'flex', alignItems:'center', gap:8, transition:'all 0.2s',
+              }}>
+                <t.I size={14}/> {t.l}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
       <div style={{ background:C.bg, marginTop:-28, borderRadius: '28px 28px 0 0', padding:'20px 16px 0' }}>
-        {!partners.length ? (
-          <div style={{ background:C.card, borderRadius:20, padding:'48px 20px', display:'flex', flexDirection:'column', alignItems:'center', gap:10, textAlign:'center', border:`2px dashed ${C.bdr}` }}>
-            <span style={{ fontSize:36 }}>👥</span>
-            <p style={{ fontSize:14, fontWeight:800, color:C.text }}>No partners yet</p>
+        {sub==='partners' && (
+          <div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+              <p style={{ fontSize:11, fontWeight:900, color:C.accent, letterSpacing:'0.1em' }}>PARTNERS ({partners.length})</p>
+              <button onClick={addP} style={{ background:C.primary, color:'#fff', border:'none', borderRadius:10, padding:'6px 12px', fontSize:11, fontWeight:800, cursor:'pointer' }}>+ ADD</button>
+            </div>
+            <Partners partners={partners} txs={txs} addP={addP} editP={editP} delP={delP} cats={cats} workers={workers}/>
           </div>
-        ) : partners.map(p => {
-          const ptx   = txs.filter(t=>t.pid===p.id);
-          const pInv  = ptx.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
-          const pExp  = ptx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-          const pBal  = pInv - pExp;
-          const burn  = pInv>0 ? Math.round((pExp/pInv)*100) : 0;
-          const isExp = exp===p.id;
-
-          return (
-            <div key={p.id} style={{ background:C.card, borderRadius:20, marginBottom:16, overflow:'hidden', border:`1px solid ${C.bdr}`, boxShadow:C.shd }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'18px 18px', borderBottom:`1px solid ${C.bdr}` }}>
-                <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-                  <div style={{ width:50, height:50, borderRadius:16, background:p.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, fontWeight:900, color:'#fff', boxShadow:`0 6px 18px ${p.color}45` }}>
-                    {p.initials}
-                  </div>
-                  <div>
-                    <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:3 }}>
-                      <p style={{ fontSize:16, fontWeight:900, color:C.text }}>{p.name}</p>
-                      {p.isYou && <span style={{ fontSize:9, fontWeight:900, padding:'2px 8px', borderRadius:6, background:`${C.orange}25`, color:C.orange, letterSpacing:'0.1em' }}>ADMIN</span>}
-                    </div>
-                    {p.email && <p style={{ fontSize:11, color:C.accent }}>{p.email}</p>}
-                  </div>
+        )}
+        {sub==='workers' && (
+          <div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+              <p style={{ fontSize:11, fontWeight:900, color:C.accent, letterSpacing:'0.1em' }}>WORKERS ({workers.length})</p>
+              <button onClick={addW} style={{ background:C.primary, color:'#fff', border:'none', borderRadius:10, padding:'6px 12px', fontSize:11, fontWeight:800, cursor:'pointer' }}>+ ADD</button>
+            </div>
+            {workers.map(w=>(
+              <div key={w.id} style={{ background:C.card, padding:16, borderRadius:16, marginBottom:12, border:`1px solid ${C.bdr}`, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <div>
+                  <p style={{ fontSize:14, fontWeight:800, color:C.text }}>{w.name}</p>
+                  <p style={{ fontSize:11, color:C.accent, marginTop:2 }}>Worker ID: {w.id}</p>
                 </div>
                 <div style={{ display:'flex', gap:8 }}>
-                  <button onClick={()=>editP(p)} style={{ width:34, height:34, borderRadius:10, border:`1px solid ${C.bdr}`, background:C.bg, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:C.accent }}>
-                    <Edit2 size={13}/>
-                  </button>
-                  {!p.isYou && <button onClick={()=>delP(p.id)} style={{ width:34, height:34, borderRadius:10, border:'1px solid rgba(239,68,68,0.2)', background:'#FFF5F5', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:C.danger }}>
-                    <Trash2 size={13}/>
-                  </button>}
+                  <button onClick={()=>editW(w)} style={{ width:32, height:32, borderRadius:8, border:`1px solid ${C.bdr}`, background:C.bg, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:C.accent }}><Edit2 size={12}/></button>
+                  <button onClick={()=>delW(w.id)} style={{ width:32, height:32, borderRadius:8, border:'none', background:'#FEF2F2', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:C.danger }}><Trash2 size={12}/></button>
                 </div>
               </div>
-
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderBottom:`1px solid ${C.bdr}` }}>
-                {[{l:'Credit Amount',v:pInv,c:C.success},{l:'Debit Amount',v:pExp,c:'#E96B3E'}].map(({l,v,c})=>(
-                  <div key={l} style={{ padding:'16px 18px' }}>
-                    <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:C.muted, marginBottom:8 }}>{l}</p>
-                    <p style={{ fontSize:24, fontWeight:900, color:c, letterSpacing:'-0.5px' }}>{inr(v)}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ padding:'16px 18px' }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
-                  <div>
-                    <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:C.muted, marginBottom:4 }}>Net Balance</p>
-                    <p style={{ fontSize:20, fontWeight:900, color:pBal>=0?C.text:C.danger }}>{inr(pBal)}</p>
-                  </div>
-                  <div style={{ textAlign:'right' }}>
-                    <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:C.muted, marginBottom:4 }}>Burn Rate</p>
-                    <p style={{ fontSize:20, fontWeight:900, color:burn>80?C.danger:burn>50?'#F59E0B':C.text }}>{burn}%</p>
-                  </div>
-                </div>
-                {pInv>0 && (
-                  <div>
-                    <div style={{ width:'100%', height:5, borderRadius:999, background:C.bg, overflow:'hidden' }}>
-                      <div style={{ width:`${Math.min(burn,100)}%`, height:'100%', borderRadius:999, background:p.color, transition:'width 0.7s' }}/>
-                    </div>
-                    <p style={{ fontSize:10, color:C.accent, marginTop:6, fontWeight:600 }}>{burn}% used</p>
-                  </div>
-                )}
-              </div>
-
-              {ptx.length>0 && (
-                <button onClick={()=>setExp(isExp?null:p.id)} style={{
-                  width:'100%', padding:'14px 18px', border:'none', cursor:'pointer',
-                  borderTop:`1px solid ${C.bdr}`, background:HERO_BG,
-                  display:'flex', alignItems:'center', justifyContent:'space-between',
-                  fontSize:12, fontWeight:800, color:'rgba(255,255,255,0.8)',
-                }}>
-                  <span>View transactions</span>
-                  <ChevronDown size={15} style={{ transform:isExp?'rotate(180deg)':'rotate(0deg)', transition:'0.2s' }}/>
-                </button>
-              )}
-
-              {isExp && (
-                <div className="animate-fade-in" style={{ borderTop:`1px solid ${C.bdr}` }}>
-                  <div style={{ padding:'0 18px 18px' }}>
-                    {ptx.slice(0,4).map((t,i,arr)=>(
-                      <TxRow key={t.id} tx={t} partner={p} isLast={i===arr.length-1||i===3} showMenu={false}/>
-                    ))}
-                  </div>
-                </div>
-              )}
+            ))}
+          </div>
+        )}
+        {sub==='cats' && (
+          <div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+              <p style={{ fontSize:11, fontWeight:900, color:C.accent, letterSpacing:'0.1em' }}>CATEGORIES ({cats.length})</p>
+              <button onClick={addC} style={{ background:C.primary, color:'#fff', border:'none', borderRadius:10, padding:'6px 12px', fontSize:11, fontWeight:800, cursor:'pointer' }}>+ ADD</button>
             </div>
-          );
-        })}
-        <div style={{ height:48 }}/>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+              {cats.map(c=>(
+                <div key={c.name} style={{ background:C.card, padding:16, borderRadius:16, border:`1px solid ${C.bdr}`, display:'flex', alignItems:'center', gap:12 }}>
+                  <div style={{ width:36, height:36, borderRadius:10, background:c.color+'20', color:c.color, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    {React.createElement(ICON_MAP[c.icon] || c.icon || Package, {size:18})}
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <p style={{ fontSize:13, fontWeight:800, color:C.text }}>{c.name}</p>
+                  </div>
+                  <button onClick={()=>delC(c.name)} style={{ color:C.muted, background:'none', border:'none', cursor:'pointer' }}><Trash2 size={14}/></button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div style={{ height:100 }}/>
       </div>
     </div>
   );
 }
 
+function WorkerModal({ open, close, save, edit }) {
+  const [name, setName] = useState('');
+  useEffect(() => { setName(edit?.name||''); }, [edit, open]);
+  if (!open) return null;
+  return (
+    <Sheet close={close}>
+      <SheetHeader title={edit?'Edit Worker':'Add Worker'} close={close}/>
+      <Fld label="Worker Name"><input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="Full name" style={inp}/></Fld>
+      <button onClick={()=>{ save({name}); close(); }} style={{ width:'100%', height:52, borderRadius:14, border:'none', background:BRAND_GRAD, color:'#fff', fontWeight:800, fontSize:15 }}>Save</button>
+    </Sheet>
+  );
+}
+
+function CatModal({ open, close, save, edit }) {
+  const [name, setName] = useState('');
+  useEffect(() => { setName(edit?.name||''); }, [edit, open]);
+  if (!open) return null;
+  return (
+    <Sheet close={close}>
+      <SheetHeader title="Add Category" close={close}/>
+      <Fld label="Category Name"><input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Raw Material" style={inp}/></Fld>
+      <button onClick={()=>{ save({name, icon:'Package', color:C.primary}); close(); }} style={{ width:'100%', height:52, borderRadius:14, border:'none', background:BRAND_GRAD, color:'#fff', fontWeight:800, fontSize:15 }}>Save</button>
+    </Sheet>
+  );
+}
+
+function Partners({ partners, txs, addP, editP, delP, cats, workers }) {
+  const [exp, setExp] = useState(null);
+  return (
+    <div>
+      {!partners.length ? (
+        <div style={{ background:C.card, borderRadius:20, padding:'48px 20px', display:'flex', flexDirection:'column', alignItems:'center', gap:10, textAlign:'center', border:`2px dashed ${C.bdr}` }}>
+          <span style={{ fontSize:36 }}>👥</span>
+          <p style={{ fontSize:14, fontWeight:800, color:C.text }}>No partners yet</p>
+        </div>
+      ) : partners.map(p => {
+        const ptx   = txs.filter(t=>t.pid===p.id);
+        const pExp  = ptx.reduce((s,t)=>s+t.amount,0);
+        const isExp = exp===p.id;
+        return (
+          <div key={p.id} style={{ background:C.card, borderRadius:20, marginBottom:16, overflow:'hidden', border:`1px solid ${C.bdr}`, boxShadow:C.shd }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'18px 18px', borderBottom:`1px solid ${C.bdr}` }}>
+              <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+                <div style={{ width:50, height:50, borderRadius:16, background:p.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, fontWeight:900, color:'#fff' }}>
+                  {p.initials}
+                </div>
+                <div>
+                  <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:3 }}>
+                    <p style={{ fontSize:16, fontWeight:900, color:C.text }}>{p.name}</p>
+                    {p.isYou && <span style={{ fontSize:9, fontWeight:900, padding:'2px 8px', borderRadius:6, background:`${C.orange}25`, color:C.orange, letterSpacing:'0.1em' }}>ADMIN</span>}
+                  </div>
+                  {p.email && <p style={{ fontSize:11, color:C.accent }}>{p.email}</p>}
+                </div>
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <button onClick={()=>editP(p)} style={{ width:34, height:34, borderRadius:10, border:`1px solid ${C.bdr}`, background:C.bg, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:C.accent }}>
+                  <Edit2 size={13}/>
+                </button>
+                {!p.isYou && <button onClick={()=>delP(p.id)} style={{ width:34, height:34, borderRadius:10, border:'1px solid rgba(239,68,68,0.2)', background:'#FFF5F5', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:C.danger }}>
+                  <Trash2 size={13}/>
+                </button>}
+              </div>
+            </div>
+            <div style={{ padding:'16px 18px' }}>
+              <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:C.muted, marginBottom:4 }}>Total Spent</p>
+              <p style={{ fontSize:20, fontWeight:900, color:C.danger }}>{inr(pExp)}</p>
+            </div>
+            {ptx.length>0 && (
+              <button onClick={()=>setExp(isExp?null:p.id)} style={{ width:'100%', padding:'14px 18px', border:'none', cursor:'pointer', borderTop:`1px solid ${C.bdr}`, background:HERO_BG, display:'flex', alignItems:'center', justifyContent:'space-between', fontSize:12, fontWeight:800, color:'rgba(255,255,255,0.8)' }}>
+                <span>View transactions</span>
+                <ChevronDown size={15} style={{ transform:isExp?'rotate(180deg)':'rotate(0deg)', transition:'0.2s' }}/>
+              </button>
+            )}
+            {isExp && (
+              <div className="animate-fade-in" style={{ borderTop:`1px solid ${C.bdr}` }}>
+                <div style={{ padding:'0 18px 18px' }}>
+                  <Timeline txs={ptx.slice(0,5)} partners={partners} workers={workers} cats={cats} showMenu={false}/>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
 // ─────────────────────────────────────────────────────────
 //  REPORTS VIEW & EXPORT LOGIC
 // ─────────────────────────────────────────────────────────
-function Reports({ txs, partners }) {
+function Reports({ txs, partners, workers, cats }) {
   const [sp, setSp] = useState('all');
-  const ft   = sp==='all' ? txs : txs.filter(t=>t.pid===sp);
-  const inv  = ft.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
-  const exp  = ft.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const bal  = inv - exp;
+  const [sw, setSw] = useState('all');
+  const [sm, setSm] = useState('all');
+  const [sc, setSc] = useState('all');
+  const [showF, setShowF] = useState(false);
+
+  const ft = useMemo(() => txs.filter(t => (
+    (sp==='all' || t.pid===sp) &&
+    (sw==='all' || t.workerId===sw) &&
+    (sm==='all' || t.mode===sm) &&
+    (sc==='all' || t.cat===sc)
+  )), [txs, sp, sw, sm, sc]);
+
+  const exp  = ft.reduce((s,t)=>s+t.amount,0);
 
   const catD = useMemo(()=>
-    Object.entries(ft.filter(t=>t.type==='expense').reduce((m,t)=>{ m[t.cat]=(m[t.cat]||0)+t.amount; return m; },{}))
-    .map(([n,v])=>({n,v,...catFn(n)})).sort((a,b)=>b.v-a.v)
-  ,[sp,txs]);
+    Object.entries(ft.reduce((m,t)=>{ m[t.cat]=(m[t.cat]||0)+t.amount; return m; },{}))
+    .map(([n,v])=>({n,v,...catFn(n, cats)})).sort((a,b)=>b.v-a.v)
+  ,[ft, cats]);
 
   const trend = useMemo(()=>MONTHS.slice().reverse().map((m,i)=>({
     m:m.slice(0,3),
-    inv: Math.round(inv*(i===5?1:0.2+i*0.16)),
     exp: Math.round(exp*(i===5?1:0.18+i*0.14)),
-  })),[inv,exp]);
+  })),[exp]);
 
   const exportPDF = () => {
-    if (!txs.length) return;
-    const doc = new jsPDF();
+    if (!ft.length) return;
+    const doc = new jsPDF('l', 'mm', 'a4');
     doc.setFontSize(18); doc.setTextColor(33,37,41);
     doc.text('LEM Financial Report', 14, 22);
     doc.setFontSize(10); doc.setTextColor(107,114,128);
     doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 14, 30);
-    doc.setFontSize(12); doc.setTextColor(33,37,41);
-    doc.text(`Total Credit Amount: ${inr(inv)}`, 14, 42);
-    doc.text(`Total Debit Amount: ${inr(exp)}`, 14, 48);
-    doc.text(`Final Balance: ${inr(bal)}`, 14, 54);
-    let y = 64;
-    partners.forEach(p => {
-      const ptx = txs.filter(t=>t.pid===p.id);
-      const pinv = ptx.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
-      const pexp = ptx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-      doc.setFontSize(10);
-      doc.text(`${p.name}: Credit Amount ${inr(pinv)}  |  Debit Amount ${inr(pexp)}`, 14, y);
-      y += 6;
+    doc.text(`Total Debit: ${inr(exp)}`, 14, 36);
+
+    const tableData = ft.map(t => [
+      dShrt(t.date), 
+      t.cat, 
+      t.note||'-', 
+      partners.find(p=>p.id===t.pid)?.name||'-', 
+      workers.find(w=>w.id===t.workerId)?.name||'-',
+      t.loc||'-',
+      t.sur||'-',
+      t.mode||'-',
+      inr(t.amount)
+    ]);
+
+    autoTable(doc, { 
+      startY: 44, 
+      head:[['Date','Category','Note','Partner','Worker','Location','Survey','Mode','Amount']], 
+      body:tableData, 
+      theme:'striped', 
+      headStyles:{fillColor:[47,54,64]}, 
+      styles:{fontSize:8} 
     });
-    const sorted = [...txs].sort((a,b) => new Date(a.date) - new Date(b.date));
-    let runBal = 0;
-    const tableData = sorted.map(t => {
-      const isInv = t.type === 'investment';
-      const rec = isInv ? t.amount : 0;
-      const ex = !isInv ? t.amount : 0;
-      runBal += (rec - ex);
-      return [dShrt(t.date), `${t.cat}${t.note ? ' - ' + t.note : ''}`, partners.find(p=>p.id===t.pid)?.name||'Unknown', rec>0?inr(rec):'-', ex>0?inr(ex):'-', inr(runBal)];
-    });
-    autoTable(doc, { startY: y+8, head:[['Date','Field / Description','Partner','Credit Amount','Debit Amount','Balance']], body:tableData, theme:'striped', headStyles:{fillColor:[73,80,87]}, styles:{fontSize:9}, margin:{top:20} });
-    const pageCount = doc.internal.getNumberOfPages();
-    for(let i=1;i<=pageCount;i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150); doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width/2, doc.internal.pageSize.height-10, {align:'center'}); }
     doc.save('LEM_Financial_Report.pdf');
   };
 
   const exportExcel = () => {
-    if (!txs.length) return;
-    const sorted = [...txs].sort((a,b) => new Date(a.date) - new Date(b.date));
-    let runBal = 0;
-    const rows = sorted.map(t => {
-      const isInv = t.type === 'investment';
-      const rec = isInv ? t.amount : 0;
-      const ex = !isInv ? t.amount : 0;
-      runBal += (rec - ex);
-      return { 'Date':dShrt(t.date), 'Field / Description':`${t.cat}${t.note?' - '+t.note:''}`, 'Partner Name':partners.find(p=>p.id===t.pid)?.name||'Unknown', 'Credit Amount':rec>0?rec:0, 'Debit Amount':ex>0?ex:0, 'Balance':runBal };
-    });
+    if (!ft.length) return;
+    const rows = ft.map(t => ({
+      'Date': dShrt(t.date),
+      'Category': t.cat,
+      'Note': t.note,
+      'Partner': partners.find(p=>p.id===t.pid)?.name,
+      'Worker': workers.find(w=>w.id===t.workerId)?.name,
+      'Location': t.loc,
+      'Survey': t.sur,
+      'Mode': t.mode,
+      'Amount': t.amount
+    }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Transactions");
-    const summaryRows = [{ Metric:'Total Credit Amount', Value:inv },{ Metric:'Total Debit Amount', Value:exp },{ Metric:'Final Balance', Value:bal },{}];
-    partners.forEach(p => {
-      const ptx = txs.filter(t=>t.pid===p.id);
-      const pinv = ptx.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
-      const pexp = ptx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-      summaryRows.push({Metric:`${p.name} - Total Credit Amount`,Value:pinv});
-      summaryRows.push({Metric:`${p.name} - Total Debit Amount`,Value:pexp});
-    });
-    const wsSum = XLSX.utils.json_to_sheet(summaryRows);
-    XLSX.utils.book_append_sheet(wb, wsSum, "Summary");
     XLSX.writeFile(wb, "LEM_Financial_Report.xlsx");
   };
 
@@ -1212,30 +1302,49 @@ function Reports({ txs, partners }) {
       <div style={{ background:HERO_BG, paddingBottom:52 }}>
         <div style={{ padding:'20px 20px 0' }}>
           <p style={{ fontSize:10, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.4)', marginBottom:8 }}>Overview</p>
-          <h1 style={{ fontSize:32, fontWeight:900, color:'#fff', letterSpacing:'-1px', lineHeight:1, marginBottom:16 }}>Reports</h1>
-          <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto' }}>
-            {[{id:'all',name:'All',color:C.primary},...partners].map(p=>(
-              <button key={p.id} onClick={()=>setSp(p.id)} style={{
-                padding:'8px 18px', borderRadius:999, fontSize:12, fontWeight:700, border:'none',
-                background: sp===p.id?C.card:'rgba(255,255,255,0.12)', color:sp===p.id?C.text:'rgba(255,255,255,0.6)',
-                cursor:'pointer', whiteSpace:'nowrap', transition:'all 0.15s',
-              }}>{p.name}</button>
-            ))}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+            <h1 style={{ fontSize:32, fontWeight:900, color:'#fff', letterSpacing:'-1px', lineHeight:1 }}>Reports</h1>
+            <button onClick={()=>setShowF(f=>!f)} style={{
+              position:'relative', width:42, height:42, borderRadius:13, border:'none',
+              background: showF ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.12)',
+              cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s',
+            }}>
+              <SlidersHorizontal size={17} color="#fff"/>
+              {(sp!=='all'||sw!=='all'||sm!=='all'||sc!=='all') && <span style={{ position:'absolute', top:7, right:7, width:7, height:7, borderRadius:'50%', background:C.orange }}/>}
+            </button>
           </div>
+
+          {showF && (
+            <div style={{ background:'rgba(255,255,255,0.1)', borderRadius:16, padding:'14px 14px 6px', marginBottom:8, border:'1px solid rgba(255,255,255,0.15)' }}>
+              <p style={{ fontSize:9, fontWeight:900, letterSpacing:'0.12em', textTransform:'uppercase', color:'rgba(255,255,255,0.45)', marginBottom:10 }}>Filter By</p>
+              <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto', marginBottom:10 }}>
+                <Chip on={sp==='all'} onClick={()=>setSp('all')}>All Partners</Chip>
+                {partners.map(p=><Chip key={p.id} on={sp===p.id} onClick={()=>setSp(p.id)} color={p.color}>{p.name}</Chip>)}
+              </div>
+              <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto', marginBottom:10 }}>
+                <Chip on={sw==='all'} onClick={()=>setSw('all')}>All Workers</Chip>
+                {workers.map(w=><Chip key={w.id} on={sw===w.id} onClick={()=>setSw(w.id)}>{w.name}</Chip>)}
+              </div>
+              <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto', marginBottom:10 }}>
+                <Chip on={sm==='all'} onClick={()=>setSm('all')}>All Payment Modes</Chip>
+                {PAY_MODES.map(m=><Chip key={m} on={sm===m} onClick={()=>setSm(m)}>{m}</Chip>)}
+              </div>
+              <div className="scrollbar-hide" style={{ display:'flex', gap:8, overflowX:'auto', marginBottom:10 }}>
+                <Chip on={sc==='all'} onClick={()=>setSc('all')}>All Categories</Chip>
+                {cats.map(c=><Chip key={c.name} on={sc===c.name} onClick={()=>setSc(c.name)}>{c.name}</Chip>)}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       <div style={{ background:C.bg, marginTop:-28, borderRadius: '28px 28px 0 0', padding:'20px 16px 0' }}>
         <div style={{ background:HERO_BG, borderRadius:20, padding:'22px 20px', marginBottom:16, boxShadow:'0 12px 32px rgba(0,0,0,0.12)' }}>
-          <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.4)', marginBottom:10 }}>Net Balance</p>
-          <p style={{ fontSize:40, fontWeight:900, color:'#fff', letterSpacing:'-2px', lineHeight:1, marginBottom:16 }}>{inr(bal)}</p>
-          <div style={{ display:'flex', gap:28 }}>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Credit Amount</p><p style={{ fontSize:15, fontWeight:900, color:'#fff' }}>{inr(inv)}</p></div>
-            <div><p style={{ fontSize:9, color:'rgba(255,255,255,0.4)', fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>Debit Amount</p><p style={{ fontSize:15, fontWeight:900, color:'#fff' }}>{inr(exp)}</p></div>
-          </div>
+          <p style={{ fontSize:9, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.4)', marginBottom:10 }}>Total Spent</p>
+          <p style={{ fontSize:40, fontWeight:900, color:'#fff', letterSpacing:'-2px', lineHeight:1, marginBottom:16 }}>{inr(exp)}</p>
         </div>
 
-        {(inv>0||exp>0) && (
+        {(exp>0) && (
           <div style={{ background:C.card, borderRadius:20, padding:'20px', marginBottom:16, border:`1px solid ${C.bdr}`, boxShadow:C.shd }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
               <p style={{ fontSize:11, fontWeight:900, letterSpacing:'0.14em', textTransform:'uppercase', color:C.accent }}>6-Month Trend</p>
@@ -1244,13 +1353,11 @@ function Reports({ txs, partners }) {
             <ResponsiveContainer width="100%" height={100}>
               <AreaChart data={trend}>
                 <defs>
-                  <linearGradient id="gi" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.success} stopOpacity={0.2}/><stop offset="100%" stopColor={C.success} stopOpacity={0}/></linearGradient>
                   <linearGradient id="gs" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.primary} stopOpacity={0.2}/><stop offset="100%" stopColor={C.primary} stopOpacity={0}/></linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false}/>
                 <XAxis dataKey="m" tick={{ fontSize:9, fill:C.muted }} axisLine={false} tickLine={false}/>
                 <Tooltip contentStyle={{ background:C.text, border:'none', borderRadius:10, color:'#fff', fontSize:11 }}/>
-                <Area type="monotone" dataKey="inv" stroke={C.success} fill="url(#gi)" strokeWidth={2} name="Credit Amount" dot={false}/>
                 <Area type="monotone" dataKey="exp" stroke={C.primary} fill="url(#gs)" strokeWidth={2} name="Debit Amount" dot={false}/>
               </AreaChart>
             </ResponsiveContainer>
@@ -1275,7 +1382,7 @@ function Reports({ txs, partners }) {
                   <div key={c.n} style={{ display:'flex', alignItems:'center', gap:8 }}>
                     <div style={{ width:7, height:7, borderRadius:'50%', background:c.color, flexShrink:0 }}/>
                     <span style={{ fontSize:12, fontWeight:700, color:C.text, flex:1, display:'flex', alignItems:'center', gap:6 }}>
-                      <Icon size={12}/> {c.n}
+                      {React.createElement(c.icon || Package, {size:12})} {c.n}
                     </span>
                     <span style={{ fontSize:12, fontWeight:900, color:C.text }}>{inrS(c.v)}</span>
                   </div>
@@ -1292,7 +1399,6 @@ function Reports({ txs, partners }) {
               {e:<BarChart3 size={22} color={C.primary}/>,l:'Transactions',v:String(txs.length),c:C.primary},
               {e:<Users2 size={22} color="#3b82f6"/>,l:'Partners',v:String(partners.length),c:'#3b82f6'},
               {e:<TrendingUp size={22} color={C.accent}/>,l:'Avg Entry',c:C.accent,v:txs.length?inrS(txs.reduce((s,t)=>s+t.amount,0)/txs.length):'₹0'},
-              {e:<Zap size={22} color={C.orange}/>,l:'Burn Rate',c:C.orange,v:inv>0?`${Math.round((exp/inv)*100)}%`:'0%'},
             ].map(s=>(
               <div key={s.l} style={{ background:C.card, borderRadius:14, padding:'16px', border:`1px solid ${C.bdr}` }}>
                 <span style={{ display:'block', marginBottom:8 }}>{s.e}</span>
@@ -1344,20 +1450,26 @@ export default function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [txs,   setTxs]   = useState(saved?.txs   || TX_INIT);
   const [parts, setParts] = useState(saved?.parts  || PARTNERS_INIT);
+  const [workers, setWorkers] = useState(saved?.workers || WORKERS_INIT);
+  const [cats, setCats] = useState(saved?.cats || CATEGORIES);
   const [addTx,  setAddTx]  = useState(false);
   const [editTx, setEditTx] = useState(null);
   const [addP,   setAddP]   = useState(false);
   const [editP,  setEditP]  = useState(null);
+  const [addW,   setAddW]   = useState(false);
+  const [editW,  setEditW]  = useState(null);
+  const [addC,   setAddC]   = useState(false);
+  const [editC,  setEditC]  = useState(null);
   const [confirm, setConf]  = useState(null);
   const [toast,   setToast] = useState(null);
 
-  useEffect(() => { save({ txs, parts }); }, [txs, parts]);
+  useEffect(() => { save({ txs, parts, workers, cats }); }, [txs, parts, workers, cats]);
 
   const toast$ = (msg,type='ok') => setToast({msg,type});
 
   const saveTx = (d) => {
     if (editTx) { setTxs(p=>p.map(t=>t.id===editTx.id?{...t,...d}:t)); toast$('Updated!'); }
-    else        { setTxs(p=>[{id:Date.now().toString(),...d},...p]); toast$(d.type==='expense'?'Expense added!':'Investment saved!'); }
+    else        { setTxs(p=>[{id:Date.now().toString(),...d},...p]); toast$('Expense added!'); }
     setEditTx(null);
   };
   const doEditTx  = (tx) => { setEditTx(tx); setAddTx(true); };
@@ -1408,10 +1520,14 @@ export default function App() {
             />
           ) : (
             <>
-              {tab==='dashboard'    && <Dashboard txs={txs} partners={parts} editTx={doEditTx} deleteTx={doDelTx} goTab={setTab} onProfile={() => setShowProfile(true)}/>}
-              {tab==='transactions' && <Transactions txs={txs} partners={parts} editTx={doEditTx} deleteTx={doDelTx}/>}
-              {tab==='partners'     && <Partners partners={parts} txs={txs} addP={()=>{ setEditP(null); setAddP(true); }} editP={doEditP} delP={doDelP}/>}
-              {tab==='reports'      && <Reports txs={txs} partners={parts}/>}
+              {tab==='dashboard'    && <Dashboard txs={txs} partners={parts} workers={workers} cats={cats} editTx={doEditTx} deleteTx={doDelTx} goTab={setTab} onProfile={() => setShowProfile(true)}/>}
+              {tab==='transactions' && <Transactions txs={txs} partners={parts} workers={workers} cats={cats} editTx={doEditTx} deleteTx={doDelTx}/>}
+              {tab==='partners'     && <Management partners={parts} workers={workers} cats={cats} txs={txs} 
+                                        addP={()=>setAddP(true)} editP={doEditP} delP={doDelP}
+                                        addW={()=>setAddW(true)} editW={w=>{setEditW(w); setAddW(true)}} delW={id=>setWorkers(p=>p.filter(w=>w.id!==id))}
+                                        addC={()=>setAddC(true)} editC={c=>{setEditC(c); setAddC(true)}} delC={n=>setCats(p=>p.filter(c=>c.name!==n))}
+                                      />}
+              {tab==='reports'      && <Reports txs={txs} partners={parts} workers={workers} cats={cats}/>}
             </>
           )}
         </div>
@@ -1420,8 +1536,10 @@ export default function App() {
           <FloatingNav active={tab} set={setTab} onAdd={()=>{ setEditTx(null); setAddTx(true); }}/>
         )}
 
-        <AddEntry open={addTx} close={closeAddTx} save={saveTx} partners={parts} edit={editTx}/>
+        <AddEntry open={addTx} close={closeAddTx} save={saveTx} partners={parts} workers={workers} categories={cats} edit={editTx}/>
         <AddPartner open={addP} close={closeAddP} save={saveP} edit={editP} taken={parts.filter(p=>p.id!==editP?.id).map(p=>p.color)}/>
+        <WorkerModal open={addW} close={()=>setAddW(false)} save={d=>{ if(editW) setWorkers(p=>p.map(w=>w.id===editW.id?{...w,...d}:w)); else setWorkers(p=>[...p,{id:Date.now().toString(),...d}]); setEditW(null); }} edit={editW}/>
+        <CatModal open={addC} close={()=>setAddC(false)} save={d=>{ if(editC) setCats(p=>p.map(c=>c.name===editC.name?{...c,...d}:c)); else setCats(p=>[...p,d]); setEditC(null); }} edit={editC}/>
       </div>
     </div>
   );
